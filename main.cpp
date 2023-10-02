@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "read.cpp"
 
 using namespace std;
@@ -6,6 +7,6 @@ using namespace std;
 int main()
 {
     cout << "hello test world" << endl;
-    test();
+    ReadCommands("test.txt");
     return 0;
 }
