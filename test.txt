@@ -1,3 +1,4 @@
 light 0.6 0 0.1 0 1 0.5 0 1
-test 1 1 1 1 1 1 1 1 1 1 1
-false 1 1 1
+size 10 10
+maxdepth 4
+output testname

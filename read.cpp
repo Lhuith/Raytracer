@@ -1,10 +1,11 @@
 /* Extrapolation of the read in functionality created by Ravi Ramamoorthi CSE167/homework 2 code*/
-
 #include <iostream>
 #include <string>
 #include <GLUT/glut.h>
 #include <fstream>
 #include <sstream>
+
+#include "variables.h"
 
 using namespace std;
 
@@ -29,7 +30,6 @@ void readfile(const char *filename)
     in.open(filename);
     if (in.is_open())
     {
-        cout << "open?" << endl;
         getline(in, str);
         while (in)
         {
@@ -45,30 +45,44 @@ void readfile(const char *filename)
 
                 // Process the light, add it to database.
                 // Lighting Command
-
-                switch (cmd)
-                {
-                }
-
                 if (cmd == "light")
                 {
                     cout << "reading in light commmand" << endl;
                     if (ReadValues(s, 8, values))
                     {
-                        //++numused;
                     }
                 }
-                else if (cmd == "test")
+                else if (cmd == "size")
                 {
-                    if (ReadValues(s, 8, values)) // stream, argument length, inserted value
+                    if (ReadValues(s, 2, values))
                     {
-                        cout << "reading test with 8 arguments" << endl;
+                        WIDTH = values[0];
+                        HEIGHT = values[1];
                     }
-                    // cout << "reading in light commmand" << endl;
-                    // validinput = ReadValues(s, 8, values); // Position/color for lts.
-                    // if (validinput)
+                }
+                else if (cmd == "maxdepth")
+                {
+                    if (ReadValues(s, 1, values))
+                    {
+                        DEPTH = values[0];
+                    }
+                }
+                else if (cmd == "output")
+                {
+                    string fileName = "";
+                    s >> fileName;
+                    if (!s.fail())
+                    {
+                        FILENAME = fileName;
+                    }
+                    else
+                    {
+                        cout << "file name grab failed!" << endl;
+                    }
+
+                    // if (ReadValues(s, 1, values))
                     // {
-                    //     //++numused;
+
                     // }
                 }
                 else
