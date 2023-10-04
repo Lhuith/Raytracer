@@ -7,7 +7,7 @@ SOURCES = main.cpp read.cpp
 OBJECTS = main.o
 TARGET = raytracer
 
-raytracer: $(OBJECTS)
+raytracer: $(OBJECTS) 
 	$(CC) $(LDOPTS) $(OBJECTS) -o $(TARGET) && ./$(TARGET) && rm -f *.o $(TARGET)
 main.o:
 	$(CC) $(CCOPTS) $(SOURCES)

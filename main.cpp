@@ -26,7 +26,17 @@ void screenshot(string type)
     string fName = FILENAME + type;
 
     int pix = w * h;
-    BYTE *pixels = new BYTE[3 * pix];
+    BYTE *pixels = new BYTE[pix * 3];
+
+    for (int i = 0; i < pix; i += 3)
+    {
+        int index = i;
+        pixels[index + 0] = 0;   // B
+        pixels[index + 1] = 0;   // G
+        pixels[index + 2] = 255; // R
+        cout << pixels[i] << endl;
+    }
+
     glReadBuffer(GL_FRONT);
     glReadPixels(0, 0, w, h, GL_BGR, GL_UNSIGNED_BYTE, pixels);
 
