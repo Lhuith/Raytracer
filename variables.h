@@ -4,7 +4,8 @@
 #include <string>
 #include <iostream>
 
-#include "glm-0.9.7.1/glm/vec3.hpp"
+#include <glm/glm.hpp>
+#include <FreeImage.h>
 
 using namespace std;
 using namespace glm;

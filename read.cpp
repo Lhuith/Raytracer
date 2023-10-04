@@ -4,9 +4,9 @@
 #include <GLUT/glut.h>
 #include <fstream>
 #include <sstream>
-
 #include "variables.h"
-#include "glm-0.9.7.1/glm/vec3.hpp"
+
+#include <glm/glm.hpp>
 
 using namespace std;
 
@@ -44,17 +44,8 @@ int readfile(const char *filename)
                 // Up to 10 params for cameras.
                 // bool validinput; // Validity of input
 
-                // Process the light, add it to database.
-                // Lighting Command
-                if (cmd == "light")
-                {
-                    cout << "reading in light commmand" << endl;
-                    if (ReadValues(s, 8, values))
-                    {
-                    }
-                }
                 // size width height
-                else if (cmd == "size")
+                if (cmd == "size")
                 {
                     if (ReadValues(s, 2, values))
                     {
@@ -101,7 +92,29 @@ int readfile(const char *filename)
 
                     FOVY = values[9];
                 }
+                // object material coloring, need to store objects to array and reference later ... somehow?
+                // TODO: diffuse r g b
+                else if (cmd == "diffuse" && ReadValues(s, 3, values))
+                {
+                    cout << "implement diffuse" << endl;
+                }
+                // TODO: specular r g b
+                else if (cmd == "specular" && ReadValues(s, 3, values))
+                {
+                    cout << "implement specular" << endl;
+                }
+                // TODO: shininess r g b
+                else if (cmd == "shininess" && ReadValues(s, 3, values))
+                {
+                    cout << "implement shininess" << endl;
+                }
+                // TODO: emission r g b
+                else if (cmd == "emission" && ReadValues(s, 3, values))
+                {
+                    cout << "implement emission" << endl;
+                }
                 // sphere x y z radius
+                // ++ to objects
                 else if (cmd == "sphere" && ReadValues(s, 4, values))
                 {
                     // sphere x y z radius
@@ -194,6 +207,27 @@ int readfile(const char *filename)
                 else if (cmd == "popTransform" && ReadValues(s, 3, values))
                 {
                     cout << "impliment pop transform" << endl;
+                }
+                // Lighting Commands
+                // TODO: directional x y z r g b
+                else if (cmd == "directional" && ReadValues(s, 6, values))
+                {
+                    cout << "impliment directional light" << endl;
+                }
+                // TODO: point x y z r g b
+                else if (cmd == "point" && ReadValues(s, 6, values))
+                {
+                    cout << "impliment point light" << endl;
+                }
+                // TODO: attenuation const linear quadratic
+                else if (cmd == "attenuation" && ReadValues(s, 3, values))
+                {
+                    cout << "impliment attenuation" << endl;
+                }
+                // TODO: ambient r g b
+                else if (cmd == "ambient" && ReadValues(s, 3, values))
+                {
+                    cout << "impliment ambient" << endl;
                 }
                 else
                 {

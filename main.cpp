@@ -2,7 +2,8 @@
 #include <string>
 #include "variables.h" // global variables
 #include "read.cpp"
-#include "glm-0.9.7.1/glm/vec3.hpp"
+
+#include <glm/glm.hpp>
 
 using namespace std;
 
@@ -16,11 +17,14 @@ void init()
     // vertex array is created/sorted on read in
     TRIS = new tri *[maxTris];
 }
+  int screenshot()
+{
+}
 
 int main()
 {
     init();
-    cout << "hello test world" << endl;
+    cout << "Eugene Martens RayTracer 2" << endl;
     int error = ReadCommands("test.txt");
     cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
     cout << "fileName: " << FILENAME << endl;
@@ -52,6 +56,10 @@ int main()
     {
         for (int j = 0; j < HEIGHT; j++)
         {
+            for (int s = 0; s < maxSpheres; s++)
+            {
+                // TODO sphere intersection/drawing I think?
+            }
             // TODO ray tracing here!
         }
     }
