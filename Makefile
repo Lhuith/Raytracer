@@ -1,7 +1,7 @@
 CC = g++
 
 CCOPTS = -c #-c
-LDOPTS = -L./ -lfreeimage
+LDOPTS = -L./ -lfreeimage -lglut -lGL
 
 SOURCES = main.cpp read.cpp
 OBJECTS = main.o
