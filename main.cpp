@@ -7,8 +7,8 @@
 #include <glm/glm.hpp>
 #include <FreeImage.h>
 
-#ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
+#ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
@@ -19,23 +19,11 @@
 
 using namespace std;
 
-void screenshot(string type)
+void GenerateImage(string type, BYTE *pixels)
 {
     int w = WIDTH;
     int h = HEIGHT;
     string fName = FILENAME + type;
-
-    int pix = w * h;
-    BYTE *pixels = new BYTE[pix * 3];
-
-    for (int i = 0; i < pix; i += 3)
-    {
-        int index = i;
-        pixels[index + 0] = 0;   // B
-        pixels[index + 1] = 0;   // G
-        pixels[index + 2] = 255; // R
-        cout << pixels[i] << endl;
-    }
 
     glReadBuffer(GL_FRONT);
     glReadPixels(0, 0, w, h, GL_BGR, GL_UNSIGNED_BYTE, pixels);
@@ -90,22 +78,26 @@ int main()
              << " <" << TRIS[i]->v1 << "," << TRIS[i]->v2 << "," << TRIS[i]->v3 << ">" << endl;
     }
 
+    int pix = WIDTH * HEIGHT;
+    BYTE *pixels = new BYTE[pix * 3];
+
     for (int i = 0; i < WIDTH; i++)
     {
         for (int j = 0; j < HEIGHT; j++)
         {
-            for (int s = 0; s < maxSpheres; s++)
-            {
-                // TODO sphere intersection/drawing I think?
-            }
-            // TODO ray tracing here!
+            int index = ((i * HEIGHT) + j) * 3;
+            pixels[index + 0] = 255; // BLUE
+            pixels[index + 1] = 125; // GREEN
+            pixels[index + 2] = 255; // RED
         }
     }
+    cout << pix * 3 << endl;
+    GenerateImage(".png", pixels);
 
     if (error == 2)
     {
         cout << "error reading information" << endl;
     }
-    screenshot(".png");
+
     return error;
 }
