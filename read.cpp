@@ -78,52 +78,45 @@ int readfile(const char *filename)
                 // camera lookfromx lookfromy lookfromz lookatx lookaty lookatz upx upy upz fov
                 else if (cmd == "camera" && ReadValues(s, 10, values))
                 {
-                    CAMLOOKFROM.x = values[0];
-                    CAMLOOKFROM.y = values[1];
-                    CAMLOOKFROM.z = values[2];
-
-                    CAMLOOKAT.x = values[3];
-                    CAMLOOKAT.y = values[4];
-                    CAMLOOKAT.z = values[5];
-
-                    CAMUP.x = values[6];
-                    CAMUP.y = values[7];
-                    CAMUP.z = values[8];
-
+                    CAMLOOKFROM = vec3(values[0], values[1], values[2]);
+                    CAMLOOKAT = vec3(values[3], values[4], values[5]);
+                    CAMUP = vec3(values[6], values[7], values[8]);
                     FOVY = values[9];
                 }
                 // object material coloring, need to store objects to array and reference later ... somehow?
-                // TODO: diffuse r g b
+                // diffuse r g b
                 else if (cmd == "diffuse" && ReadValues(s, 3, values))
                 {
-                    cout << "implement diffuse" << endl;
+                    DIFFUSE = vec3(values[0], values[1], values[2]);
                 }
-                // TODO: specular r g b
+                // specular r g b
                 else if (cmd == "specular" && ReadValues(s, 3, values))
                 {
-                    cout << "implement specular" << endl;
+                    SPECULAR = vec3(values[0], values[1], values[2]);
                 }
-                // TODO: shininess r g b
-                else if (cmd == "shininess" && ReadValues(s, 3, values))
-                {
-                    cout << "implement shininess" << endl;
-                }
-                // TODO: emission r g b
+                // emission r g b
                 else if (cmd == "emission" && ReadValues(s, 3, values))
                 {
-                    cout << "implement emission" << endl;
+                    EMISSION = vec3(values[0], values[1], values[2]);
+                }
+                // shininess r g b
+                else if (cmd == "shininess" && ReadValues(s, 1, values))
+                {
+                    SHINY = values[0];
                 }
                 // sphere x y z radius
                 // ++ to objects
                 else if (cmd == "sphere" && ReadValues(s, 4, values))
                 {
-                    // sphere x y z radius
-                    SPHERES[numSpheres++] = new sphere(
-                        values[0],
-                        values[1],
-                        values[2],
-                        values[3]);
-                    // cout << "number of spheres: " << numSpheres << endl;
+                    OBJS[numObjs] = new sphere(
+                        values[0], values[1], values[2], values[3]);
+                    OBJS[numObjs]->mat = material(
+                        DIFFUSE,
+                        SPECULAR,
+                        EMISSION,
+                        AMBIENT,
+                        SHINY);
+                    numObjs++;
                 }
                 // maxverts number
                 else if (cmd == "maxverts" && ReadValues(s, 1, values))
@@ -161,12 +154,17 @@ int readfile(const char *filename)
                 // tri v1 v2 v3
                 else if (cmd == "tri" && ReadValues(s, 3, values))
                 {
-                    // sphere x y z radius
-                    TRIS[numTris++] = new tri(
+                    OBJS[numObjs] = new tri(
                         values[0],
                         values[1],
                         values[2]);
-                    // cout << "number of spheres: " << numSpheres << endl;
+                    OBJS[numObjs]->mat = material(
+                        DIFFUSE,
+                        SPECULAR,
+                        EMISSION,
+                        AMBIENT,
+                        SHINY);
+                    numObjs++;
                 }
                 // maxvertnorms number
                 else if (cmd == "maxvertnorms" && ReadValues(s, 1, values))
@@ -209,25 +207,21 @@ int readfile(const char *filename)
                     cout << "impliment pop transform" << endl;
                 }
                 // Lighting Commands
-                // TODO: directional x y z r g b
-                else if (cmd == "directional" && ReadValues(s, 6, values))
+                // directional 0 0 1 .5 .5 .5
+                // point 4 0 4 .5 .5 .5
+                else if ((cmd == "directional" || cmd == "point") && ReadValues(s, 6, values))
                 {
-                    cout << "impliment directional light" << endl;
-                }
-                // TODO: point x y z r g b
-                else if (cmd == "point" && ReadValues(s, 6, values))
-                {
-                    cout << "impliment point light" << endl;
+                    cout << "impliment light" << endl;
                 }
                 // TODO: attenuation const linear quadratic
                 else if (cmd == "attenuation" && ReadValues(s, 3, values))
                 {
                     cout << "impliment attenuation" << endl;
                 }
-                // TODO: ambient r g b
+                // ambient r g b
                 else if (cmd == "ambient" && ReadValues(s, 3, values))
                 {
-                    cout << "impliment ambient" << endl;
+                    AMBIENT = vec3(values[0], values[1], values[2]);
                 }
                 else
                 {

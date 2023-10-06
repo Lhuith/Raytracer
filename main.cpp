@@ -42,10 +42,17 @@ void init()
     WIDTH = 0;
     HEIGHT = 0;
     DEPTH = 5;
-    SPHERES = new sphere *[maxSpheres];
+    OBJS = new obj *[MAX_OBJS];
+    FILENAME = "default";
+}
 
-    // vertex array is created/sorted on read in
-    TRIS = new tri *[maxTris];
+void ReadOut()
+{
+    cout << "camera: "
+         << "from <" << CAMLOOKFROM.x << ", " << CAMLOOKFROM.y << ", " << CAMLOOKFROM.z << "> "
+         << "at <" << CAMLOOKAT.x << ", " << CAMLOOKAT.y << ", " << CAMLOOKAT.z << "> "
+         << "up <" << CAMUP.x << ", " << CAMUP.y << ", " << CAMUP.z << "> "
+         << "fovy " << FOVY << endl;
 }
 
 int main()
@@ -55,30 +62,8 @@ int main()
     int error = ReadCommands("test.txt");
     cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
     cout << "fileName: " << FILENAME << endl;
-    cout << "camera: "
-         << "from <" << CAMLOOKFROM.x << ", " << CAMLOOKFROM.y << ", " << CAMLOOKFROM.z << "> "
-         << "at <" << CAMLOOKAT.x << ", " << CAMLOOKAT.y << ", " << CAMLOOKAT.z << "> "
-         << "up <" << CAMUP.x << ", " << CAMUP.y << ", " << CAMUP.z << "> "
-         << "fovy " << FOVY << endl;
-
-    for (int i = 0; i < numSpheres; i++)
-    {
-        cout << "sphere_" << i
-             << " <" << SPHERES[i]->c.x << "," << SPHERES[i]->c.y << "," << SPHERES[i]->c.z << ","
-             << ">, rad: " << SPHERES[i]->rad << endl;
-    }
-
-    for (int i = 0; i < MAXVERTS; i++)
-    {
-        cout << "vertex_" << i
-             << " <" << VERTS[i]->x << "," << VERTS[i]->y << "," << VERTS[i]->z << ">" << endl;
-    }
-
-    for (int i = 0; i < numTris; i++)
-    {
-        cout << "tri_" << i
-             << " <" << TRIS[i]->v1 << "," << TRIS[i]->v2 << "," << TRIS[i]->v3 << ">" << endl;
-    }
+    cout << "# of objects: " << numObjs << endl;
+    // ReadOut();
 
     int pix = WIDTH * HEIGHT;
     BYTE *pixels = new BYTE[pix * 3];
@@ -88,6 +73,7 @@ int main()
     {
         for (int j = 0; j < WIDTH; j++)
         {
+            vec3 c = vec3(0, 0, 0);
             // for each pixel
             int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
             // trace primary eye ray, find intersection
@@ -103,16 +89,26 @@ int main()
                 float _a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
                 float _b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
 
-                // cout << "alpha: " << _a << ", ";
-                // cout << "beta: " << _b << ", ";
-
                 ray r = ray(CAMLOOKFROM, glm::normalize(_a * u + _b * v - w));
 
                 float dist = INFINITY;
-                if (SPHERES[0]->intersecting(r, &dist))
+
+                if (numObjs != 0)
                 {
-                    SetPixel(pixels, pixel, 255, 0, 100);
+
+                    for (int i = 0; i < numObjs; i++)
+                    {
+                        c = vec3(0, 0, 0);
+                        if (OBJS[i]->intersecting(r, &dist))
+                        {
+                            SetPixel(pixels, pixel,
+                                     OBJS[i]->mat.diffuse.r * 255,
+                                     OBJS[i]->mat.diffuse.g * 255,
+                                     OBJS[i]->mat.diffuse.b * 255);
+                        }
+                    }
                 }
+
                 // if (pixel % 41 == 0)
                 // {
 
