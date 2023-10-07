@@ -45,7 +45,9 @@ void init()
     WIDTH = 0;
     HEIGHT = 0;
     DEPTH = 5;
+
     OBJS = new obj *[MAX_OBJS];
+    LIGHTS = new light *[MAX_LIGHTS];
 }
 
 void ReadOut()
@@ -69,8 +71,6 @@ int main(int argc, char *argv[])
 
     int pix = WIDTH * HEIGHT;
     BYTE *pixels = new BYTE[pix * 3];
-    float __a = 0;
-    float __b;
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)

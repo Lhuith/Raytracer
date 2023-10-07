@@ -27,9 +27,10 @@ float FOVY;
 vec3 EMISSION;
 vec3 DIFFUSE;
 vec3 SPECULAR;
-vec3 AMBIENT;
+vec3 AMBIENT = vec3(.2, .2, .2);
 float SHINY;
 
+vec3 ATTEN = vec3(1, 0, 0);
 class material
 {
 public:
@@ -75,6 +76,16 @@ public:
 
 class light
 {
+public:
+    vec3 pos;
+    vec3 col;
+    string type;
+    light(vec3 p, vec3 c, string t)
+    {
+        pos = p;
+        col = c;
+        type = t;
+    }
 };
 
 int MAX_LIGHTS = 10;
@@ -84,7 +95,7 @@ light **LIGHTS;
 class obj
 {
 public:
-    mat4 transform;
+    mat4 tr;
     material mat;
     obj() {}
     virtual string type() { return "default"; }
@@ -147,6 +158,8 @@ public:
         }
 
         // compute barycentric coordinates (u, w, v | alpha, beta, gamma)
+        // https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+        // Thanks John Calsbeek
         vec3 v0 = B - A;
         vec3 v1 = C - A;
         vec3 v2 = P - A;

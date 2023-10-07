@@ -4,9 +4,11 @@
 #include <GLUT/glut.h>
 #include <fstream>
 #include <sstream>
+#include <stack>
 #include "variables.h"
 
 #include <glm/glm.hpp>
+#include "transform.h"
 
 using namespace std;
 
@@ -27,8 +29,17 @@ bool ReadValues(stringstream &s, const int numvals, GLfloat *values)
     return true;
 }
 
+void rightmult(const mat4 &M, stack<mat4> &t_stack)
+{
+    mat4 &T = t_stack.top();
+    T = T * M;
+}
+
 int ReadCommands(const string filename)
 {
+    stack<mat4> t_stack;
+    t_stack.push(mat4(1.0));
+
     string str, cmd;
     ifstream in;
     in.open(READIN_LOCATION + filename + READIN_FILETYPE);
@@ -185,42 +196,63 @@ int ReadCommands(const string filename)
                 {
                     cout << "impliment max vert normals" << endl;
                 }
-                // TODO: translate x y z
                 else if (cmd == "translate" && ReadValues(s, 3, values))
                 {
-                    cout << "impliment translate" << endl;
+                    cout << "translate> ";
+                    cout << values[0] << ", " << values[1] << ", " << values[2] << " ";
+                    rightmult(
+                        transform::translate(values[0], values[1], values[2]), t_stack);
+                    cout << endl;
                 }
-                // TODO: rotate x y z angle
-                else if (cmd == "rotate" && ReadValues(s, 4, values))
-                {
-                    cout << "impliment rotate" << endl;
-                }
-                // TODO: scale x y z
                 else if (cmd == "scale" && ReadValues(s, 3, values))
                 {
-                    cout << "impliment scale" << endl;
+                    cout << "scale> ";
+                    cout << values[0] << ", " << values[1] << ", " << values[2] << " ";
+                    rightmult(transform::scale(values[0], values[1], values[2]), t_stack);
+                    cout << endl;
                 }
-                // TODO: pushTransform
+                else if (cmd == "rotate" && ReadValues(s, 4, values))
+                {
+                    cout << "rotate> ";
+                    cout << "axis: " << values[0] << ", " << values[1] << ", " << values[2] << " ";
+                    cout << "angle: " << values[3];
+                    // [c][r]
+                    mat3 rot = transform::rotate(
+                        values[3], vec3(values[0], values[1], values[2]));
+                    rightmult(mat4(rot), t_stack);
+                    cout << endl;
+                }
+                // pushTransform
                 else if (cmd == "pushTransform" && ReadValues(s, 3, values))
                 {
-                    cout << "impliment push transform" << endl;
+                    t_stack.push(t_stack.top());
                 }
-                // TODO: popTransform
+                // popTransform
                 else if (cmd == "popTransform" && ReadValues(s, 3, values))
                 {
-                    cout << "impliment pop transform" << endl;
+                    if (t_stack.size() <= 1)
+                    {
+                        cerr << "cant pop stack" << endl;
+                    }
+                    else
+                    {
+                        t_stack.pop();
+                    }
                 }
                 // Lighting Commands
                 // directional 0 0 1 .5 .5 .5
                 // point 4 0 4 .5 .5 .5
                 else if ((cmd == "directional" || cmd == "point") && ReadValues(s, 6, values))
                 {
-                    cout << "impliment light" << endl;
+                    LIGHTS[numLights++] = new light(
+                        vec3(values[0], values[1], values[2]),
+                        vec3(values[3], values[4], values[5]),
+                        cmd);
                 }
-                // TODO: attenuation const linear quadratic
+                // attenuation const linear quadratic
                 else if (cmd == "attenuation" && ReadValues(s, 3, values))
                 {
-                    cout << "impliment attenuation" << endl;
+                    ATTEN = vec3(values[0], values[1], values[2]);
                 }
                 // ambient r g b
                 else if (cmd == "ambient" && ReadValues(s, 3, values))
