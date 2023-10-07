@@ -10,6 +10,9 @@
 
 using namespace std;
 
+#define READIN_LOCATION "testscenes/"
+#define READIN_FILETYPE ".test"
+
 bool ReadValues(stringstream &s, const int numvals, GLfloat *values)
 {
     for (int i = 0; i < numvals; i++)
@@ -24,11 +27,11 @@ bool ReadValues(stringstream &s, const int numvals, GLfloat *values)
     return true;
 }
 
-int readfile(const char *filename)
+int ReadCommands(const string filename)
 {
     string str, cmd;
     ifstream in;
-    in.open(filename);
+    in.open(READIN_LOCATION + filename + READIN_FILETYPE);
     if (in.is_open())
     {
         getline(in, str);
@@ -66,13 +69,14 @@ int readfile(const char *filename)
                 {
                     string name = "";
                     s >> name;
-                    if (!s.fail())
+                    if (!s.fail() && s.rdbuf()->in_avail() != 0)
                     {
                         FILENAME = name;
                     }
                     else
                     {
-                        cout << "file name grab failed!" << endl;
+                        cout << "output not in file, using filename" << endl;
+                        FILENAME = filename;
                     }
                 }
                 // camera lookfromx lookfromy lookfromz lookatx lookaty lookatz upx upy upz fov
@@ -236,10 +240,13 @@ int readfile(const char *filename)
         cerr << "Unable to Open Input Data File " << filename << "\n";
         return 2;
     }
-    return 0;
-}
 
-int ReadCommands(const char *filename)
-{
-    return readfile(filename);
+    // no ouput filename was given
+    if (FILENAME == "")
+    {
+        cout << "output not in file, using filename" << endl;
+        FILENAME = filename;
+    }
+
+    return 0;
 }

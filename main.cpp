@@ -46,7 +46,6 @@ void init()
     HEIGHT = 0;
     DEPTH = 5;
     OBJS = new obj *[MAX_OBJS];
-    FILENAME = "default";
 }
 
 void ReadOut()
@@ -62,13 +61,8 @@ int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer 2" << endl;
-    int error = ReadCommands("test.test");
 
-    if (FILENAME == "")
-    {
-        FILENAME = "test";
-    }
-
+    int error = ReadCommands("scene1");
     cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
     cout << "fileName: " << FILENAME << endl;
     cout << "# of objects: " << numObjs << endl;
