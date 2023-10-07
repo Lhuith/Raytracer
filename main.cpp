@@ -19,14 +19,17 @@
 
 using namespace std;
 
-void GenerateImage(string type, BYTE *pixels)
+#define IMAGE_LOCATION "images/"
+
+void GenerateImage(BYTE *pixels)
 {
-    std::cout << "Saving screenshot: " << FILENAME + type << "\n";
+    std::cout << "Saving screenshot: " << FILENAME + ".png"
+              << "\n";
     FreeImage_Save(
         FIF_PNG,
         FreeImage_ConvertFromRawBits(
             pixels, WIDTH, HEIGHT, WIDTH * 3, 24, 0xFF0000, 0x00FF00, 0x0000FF, false),
-        (FILENAME + type).c_str(), 0);
+        (IMAGE_LOCATION + FILENAME + ".png").c_str(), 0);
     delete[] pixels;
 }
 // GL_BGR
@@ -55,15 +58,20 @@ void ReadOut()
          << "fovy " << FOVY << endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer 2" << endl;
-    int error = ReadCommands("test.txt");
+    int error = ReadCommands("test.test");
+
+    if (FILENAME == "")
+    {
+        FILENAME = "test";
+    }
+
     cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
     cout << "fileName: " << FILENAME << endl;
     cout << "# of objects: " << numObjs << endl;
-    // ReadOut();
 
     int pix = WIDTH * HEIGHT;
     BYTE *pixels = new BYTE[pix * 3];
@@ -123,7 +131,7 @@ int main()
         }
     }
     cout << pix * 3 << endl;
-    GenerateImage(".png", pixels);
+    GenerateImage(pixels);
 
     if (error == 2)
     {
