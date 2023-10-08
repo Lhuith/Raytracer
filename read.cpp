@@ -131,6 +131,8 @@ int ReadCommands(const string filename)
                         EMISSION,
                         AMBIENT,
                         SHINY);
+                    OBJS[numObjs]->tr = t_stack.top();
+                    OBJS[numObjs]->inv_tr = glm::inverse(OBJS[numObjs]->tr);
                     numObjs++;
                 }
                 // maxverts number
@@ -179,6 +181,8 @@ int ReadCommands(const string filename)
                         EMISSION,
                         AMBIENT,
                         SHINY);
+                    OBJS[numObjs]->tr = t_stack.top();
+                    OBJS[numObjs]->inv_tr = glm::inverse(OBJS[numObjs]->tr);
                     numObjs++;
                 }
                 // maxvertnorms number

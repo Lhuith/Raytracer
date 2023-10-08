@@ -4,6 +4,7 @@
     "Calsbeek",
     "CAMLOOKAT",
     "CAMUP",
+    "dehomogeneous",
     "fovx",
     "FOVY",
     "maxdepth",
@@ -15,5 +16,10 @@
     "trnsfrm",
     "VERTS"
   ],
-  "C_Cpp.default.compilerPath": "/usr/bin/g++"
+  "C_Cpp.default.compilerPath": "/usr/bin/g++",
+  "files.exclude": {
+    "**/._*": true,
+    "**/.gitignore": true,
+    "**/*.dSYM": true
+  }
 }

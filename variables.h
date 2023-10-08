@@ -62,40 +62,19 @@ public:
     }
     ray transform_ray(mat4 t)
     {
-        ray t_ray = ray(o, d);
+        vec4 o_tran = vec4(o, 1) * t;
+        vec4 d_tran = vec4(d, 0) * t;
 
-        vec4 o_transform = (t * vec4(o.x, o.y, o.z, 0));
-        t_ray.o = vec3(o_transform.x, o_transform.y, o_transform.z);
-
-        vec4 d_transform = glm::normalize(t * vec4(d.x, d.y, d.z, 1));
-        t_ray.d = vec3(d_transform.x, d_transform.y, d_transform.z);
-
-        return t_ray;
+        return ray(
+            vec3(o_tran.x, o_tran.y, o_tran.z) / o_tran.w,
+            vec3(d_tran.x, d_tran.y, d_tran.z));
     }
 };
-
-class light
-{
-public:
-    vec3 pos;
-    vec3 col;
-    string type;
-    light(vec3 p, vec3 c, string t)
-    {
-        pos = p;
-        col = c;
-        type = t;
-    }
-};
-
-int MAX_LIGHTS = 10;
-int numLights;
-light **LIGHTS;
 
 class obj
 {
 public:
-    mat4 tr;
+    mat4 tr, inv_tr;
     material mat;
     obj() {}
     virtual string type() { return "default"; }
@@ -107,7 +86,7 @@ public:
     virtual void print() {}
 };
 
-int MAX_OBJS = 10;
+int MAX_OBJS = 100;
 int numObjs;
 obj **OBJS;
 
@@ -115,15 +94,49 @@ class sphere : public obj
 {
 public:
     vec3 c;
-    float rad;
-    sphere(float _x, float _y, float _z, float r) : obj()
+    float r;
+    sphere(float _x, float _y, float _z, float _r) : obj()
     {
         c = vec3(_x, _y, _z);
-        rad = r;
+        r = _r;
     };
     string type() { return "sphere"; }
-    bool intersecting(const ray &r, float *dist_to_ray)
+
+    // https : // www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
+    bool intersecting(const ray &ray, float *dist_to_ray)
     {
+        // t^2 * (dir⋅dir) + 2t*dir ⋅ (origin - centre) + (origin - centre)⋅(origin - centre) - r^2 = 0
+        float t0, t1;
+
+        vec3 L = ray.o - c;
+
+        float a = dot(ray.d, ray.d);
+        float b = 2 * dot(ray.d, L);
+        float c = dot(L, L) - pow(r, 2);
+
+        // quadratic solve
+        float disc = b * b - 4 * a * c;
+        if (disc < 0)
+            return false;
+        else if (disc == 0)
+            t0 = t1 = -0.5 * b / a;
+        else
+        {
+            float q = (b > 0) ? -0.5 * (b + sqrt(disc)) : -0.5 * (b - sqrt(disc));
+            t0 = q / a;
+            t1 = c / q;
+        }
+        if (t0 > t1)
+            swap(t0, t1);
+
+        if (t0 < 0)
+        {
+            t0 = t1;
+            if (t0 < 0)
+                return false;
+        }
+        *dist_to_ray = t0;
+
         return true;
     }
 };
@@ -140,16 +153,20 @@ public:
 
     tri(int _1, int _2, int _3)
     {
-        cout << _1 << ", " << _2 << ", " << _3 << endl;
         A = *VERTS[_1];
         B = *VERTS[_2];
         C = *VERTS[_3];
-        n = glm::normalize(glm::cross(glm::normalize(B - A), glm::normalize(C - A)));
+        n = glm::normalize(glm::cross(B - A, C - A));
     }
     bool intersecting(const ray &r, float *dist_to_ray)
     {
+        if (abs(glm::dot(r.d, n)) == 0)
+        {
+            return false;
+        }
+
         // t, length, reduced to fall into place space
-        float t = glm::dot(A, n) - glm::dot(r.o, n) / glm::dot(r.d, n);
+        float t = (glm::dot(A, n) - glm::dot(r.o, n)) / glm::dot(r.d, n);
         vec3 P = r.o + (r.d * t);
 
         if (t < 1e-2)
@@ -169,15 +186,17 @@ public:
         float d11 = dot(v1, v1);
         float d20 = dot(v2, v0);
         float d21 = dot(v2, v1);
-        float denm = d00 * d11 - d01 * d01;
-        float _alpha = (d11 * d20 - d01 * d21) / denm;
-        float _beta = (d00 * d21 - d01 * d20) / denm;
-        float _gamma = 1.0f - _alpha - _beta;
 
-        if (_beta > -EPS && _beta < 1.0 + EPS &&
-            _gamma > -EPS && _gamma < 1.0 + EPS &&
-            _alpha > -EPS && _alpha < 1.0 + EPS)
+        float denm = d00 * d11 - d01 * d01;
+        float v = (d11 * d20 - d01 * d21) / denm;
+        float w = (d00 * d21 - d01 * d20) / denm;
+        float u = 1.0 - v - w;
+
+        if (v > -EPS && v < 1.0 + EPS &&
+            w > -EPS && w < 1.0 + EPS &&
+            u > -EPS && u < 1.0 + EPS)
         {
+            *dist_to_ray = t;
             return true;
         }
         return false;
@@ -185,5 +204,27 @@ public:
     string type() { return "tri"; }
     void print() {}
 };
+
+class light
+{
+public:
+    vec3 pos;
+    vec3 col;
+    string type;
+    light(vec3 p, vec3 c, string t)
+    {
+        pos = p;
+        col = c;
+        type = t;
+    }
+    vec3 calculate_light(obj &o, ray &r, vec3 &hp, const float *atten)
+    {
+        return vec3(1.0, 1.0, 1.0);
+    }
+};
+
+int MAX_LIGHTS = 10;
+int numLights;
+light **LIGHTS;
 
 #endif
