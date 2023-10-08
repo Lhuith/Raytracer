@@ -30,7 +30,6 @@ void generate_image(BYTE *pixels)
         FreeImage_ConvertFromRawBits(
             pixels, WIDTH, HEIGHT, WIDTH * 3, 24, 0xFF0000, 0x00FF00, 0x0000FF, false),
         (IMAGE_LOCATION + FILENAME + ".png").c_str(), 0);
-    delete[] pixels;
 }
 // GL_BGR
 void SetPixel(BYTE *pixels, int i, int r, int g, int b)
@@ -65,12 +64,12 @@ void ReadOut()
          << "fovy " << FOVY << endl;
 }
 
-int main(int argc, char *argv[])
+int trace(string scene)
 {
-    init();
-    cout << "Eugene Martens RayTracer" << endl;
+    numObjs = 0;
+    numLights = 0;
 
-    int error = ReadCommands("scene2");
+    int error = ReadCommands(scene);
     cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
     cout << "fileName: " << FILENAME << endl;
 
@@ -134,6 +133,15 @@ int main(int argc, char *argv[])
                     continue;
 
                 c = hit_obj->mat.ambient + hit_obj->mat.emission;
+
+                for (int i = 0; i < numLights; i++)
+                {
+                    if (LIGHTS[i]->type == "directional")
+                    {
+                        c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+                    }
+                }
+
                 SetPixel(pixels, pixel, c);
             }
         }
@@ -145,6 +153,30 @@ int main(int argc, char *argv[])
     {
         cout << "error reading information" << endl;
     }
-
+    // delete[] pixels;
     return error;
+}
+
+string scenes[] =
+    {
+        "scene1-camera1",
+        "scene1-camera2",
+        "scene1-camera3",
+        "scene1-camera4",
+        //"scene2-camera1",
+        //"scene2-camera2",
+        //"scene2-camera3",
+};
+
+int main(int argc, char *argv[])
+{
+    init();
+    cout << "Eugene Martens RayTracer" << endl;
+    // trace("scene1");
+    for (string s : scenes)
+    {
+        cout << s << endl;
+        trace(s);
+    }
+    return 0;
 }

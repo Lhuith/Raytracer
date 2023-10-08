@@ -40,7 +40,7 @@ int ReadCommands(const string filename)
     stack<mat4> t_stack;
     t_stack.push(mat4(1.0));
 
-    string str, cmd;
+    string str, cmd, readInFileName;
     ifstream in;
     in.open(READIN_LOCATION + filename + READIN_FILETYPE);
     if (in.is_open())
@@ -82,12 +82,7 @@ int ReadCommands(const string filename)
                     s >> name;
                     if (!s.fail() && s.rdbuf()->in_avail() != 0)
                     {
-                        FILENAME = name;
-                    }
-                    else
-                    {
-                        cout << "output not in file, using filename" << endl;
-                        FILENAME = filename;
+                        readInFileName = name;
                     }
                 }
                 // camera lookfromx lookfromy lookfromz lookatx lookaty lookatz upx upy upz fov
@@ -278,7 +273,7 @@ int ReadCommands(const string filename)
     }
 
     // no ouput filename was given
-    if (FILENAME == "")
+    if (readInFileName == "")
     {
         cout << "output not in file, using filename" << endl;
         FILENAME = filename;

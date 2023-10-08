@@ -83,6 +83,7 @@ public:
         cout << "default intersection" << endl;
         return false;
     }
+    virtual vec3 interpolateNormal(const vec3 &p) {}
     virtual void print() {}
 };
 
@@ -139,6 +140,11 @@ public:
 
         return true;
     }
+    vec3 interpolateNormal(const vec3 &p)
+    {
+        vec3 t_p = vec4(p, 1.0) * inv_tr;
+        return vec3(vec4(t_p - c, 1.0) * transpose(inv_tr));
+    }
 };
 
 int MAXVERTS;
@@ -150,14 +156,40 @@ class tri : public obj
 {
 public:
     vec3 A, B, C, n; // store index of vert
-
+    vec3 na, nb, nc;
     tri(int _1, int _2, int _3)
     {
         A = *VERTS[_1];
         B = *VERTS[_2];
         C = *VERTS[_3];
-        n = glm::normalize(glm::cross(B - A, C - A));
+        na = nb = nc = n = glm::normalize(glm::cross(B - A, C - A));
     }
+    void normals(int n1, int n2, int n3)
+    {
+    }
+    // alpha, beta, gamma
+    vec3 barycentric(vec3 p)
+    {
+        // compute barycentric coordinates (u, w, v | alpha, beta, gamma)
+        // https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+        // Thanks John Calsbeek
+        vec3 v0 = B - A;
+        vec3 v1 = C - A;
+        vec3 v2 = p - A;
+
+        float d00 = dot(v0, v0);
+        float d01 = dot(v0, v1);
+        float d11 = dot(v1, v1);
+        float d20 = dot(v2, v0);
+        float d21 = dot(v2, v1);
+
+        float denm = d00 * d11 - d01 * d01;
+        float beta = (d11 * d20 - d01 * d21) / denm;
+        float gamma = (d00 * d21 - d01 * d20) / denm;
+        float alpha = 1.0 - beta - gamma;
+        return vec3(alpha, beta, gamma);
+    }
+
     bool intersecting(const ray &r, float *dist_to_ray)
     {
         if (abs(glm::dot(r.d, n)) == 0)
@@ -174,27 +206,11 @@ public:
             return false;
         }
 
-        // compute barycentric coordinates (u, w, v | alpha, beta, gamma)
-        // https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
-        // Thanks John Calsbeek
-        vec3 v0 = B - A;
-        vec3 v1 = C - A;
-        vec3 v2 = P - A;
+        vec3 bary = barycentric(P);
 
-        float d00 = dot(v0, v0);
-        float d01 = dot(v0, v1);
-        float d11 = dot(v1, v1);
-        float d20 = dot(v2, v0);
-        float d21 = dot(v2, v1);
-
-        float denm = d00 * d11 - d01 * d01;
-        float v = (d11 * d20 - d01 * d21) / denm;
-        float w = (d00 * d21 - d01 * d20) / denm;
-        float u = 1.0 - v - w;
-
-        if (v > -EPS && v < 1.0 + EPS &&
-            w > -EPS && w < 1.0 + EPS &&
-            u > -EPS && u < 1.0 + EPS)
+        if (bary.x > -EPS && bary.x < 1.0 + EPS &&
+            bary.y > -EPS && bary.y < 1.0 + EPS &&
+            bary.z > -EPS && bary.z < 1.0 + EPS)
         {
             *dist_to_ray = t;
             return true;
@@ -202,6 +218,14 @@ public:
         return false;
     }
     string type() { return "tri"; }
+    vec3 interpolateNormal(const vec3 &p)
+    {
+        vec3 t_p = vec4(p, 1.0) * inv_tr;
+        vec3 bary = barycentric(t_p);
+
+        return vec3(
+            vec4((na * bary.x) + (nb * bary.y) + (nc * bary.z), 0.0f) * transpose(inv_tr));
+    }
     void print() {}
 };
 
@@ -217,9 +241,23 @@ public:
         col = c;
         type = t;
     }
-    vec3 calculate_light(obj &o, ray &r, vec3 &hp, const float *atten)
+    vec3 calculate_light(obj &o, ray &r, vec3 &hp, const vec3 &atten)
     {
-        return vec3(1.0, 1.0, 1.0);
+        vec3 l;
+        if (type == "directional")
+        {
+            l = normalize(pos);
+        }
+        else if (type == "point")
+        {
+            l = normalize(pos - hp);
+        }
+
+        vec3 n = normalize(o.interpolateNormal(hp));
+        float n_l = glm::max(dot(n, l), 0.0f);
+        vec3 d = o.mat.diffuse * col * n_l;
+
+        return d;
     }
 };
 
