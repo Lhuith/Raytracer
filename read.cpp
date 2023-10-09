@@ -85,6 +85,26 @@ int ReadCommands(const string filename)
                         readInFileName = name;
                     }
                 }
+                // Lighting Commands
+                // directional 0 0 1 .5 .5 .5
+                // point 4 0 4 .5 .5 .5
+                else if ((cmd == "directional" || cmd == "point") && ReadValues(s, 6, values))
+                {
+                    LIGHTS[numLights++] = new light(
+                        vec3(values[0], values[1], values[2]),
+                        vec3(values[3], values[4], values[5]),
+                        cmd);
+                }
+                // attenuation const linear quadratic
+                else if (cmd == "attenuation" && ReadValues(s, 3, values))
+                {
+                    ATTEN = vec3(values[0], values[1], values[2]);
+                }
+                // ambient r g b
+                else if (cmd == "ambient" && ReadValues(s, 3, values))
+                {
+                    AMBIENT = vec3(values[0], values[1], values[2]);
+                }
                 // camera lookfromx lookfromy lookfromz lookatx lookaty lookatz upx upy upz fov
                 else if (cmd == "camera" && ReadValues(s, 10, values))
                 {
@@ -216,18 +236,17 @@ int ReadCommands(const string filename)
                     cout << "axis: " << values[0] << ", " << values[1] << ", " << values[2] << " ";
                     cout << "angle: " << values[3];
                     // [c][r]
-                    mat3 rot = transform::rotate(
-                        values[3], vec3(values[0], values[1], values[2]));
+                    mat3 rot = transform::rotate(values[3], vec3(values[0], values[1], values[2]));
                     rightmult(mat4(rot), t_stack);
                     cout << endl;
                 }
                 // pushTransform
-                else if (cmd == "pushTransform" && ReadValues(s, 3, values))
+                else if (cmd == "pushTransform")
                 {
                     t_stack.push(t_stack.top());
                 }
                 // popTransform
-                else if (cmd == "popTransform" && ReadValues(s, 3, values))
+                else if (cmd == "popTransform")
                 {
                     if (t_stack.size() <= 1)
                     {
@@ -237,26 +256,6 @@ int ReadCommands(const string filename)
                     {
                         t_stack.pop();
                     }
-                }
-                // Lighting Commands
-                // directional 0 0 1 .5 .5 .5
-                // point 4 0 4 .5 .5 .5
-                else if ((cmd == "directional" || cmd == "point") && ReadValues(s, 6, values))
-                {
-                    LIGHTS[numLights++] = new light(
-                        vec3(values[0], values[1], values[2]),
-                        vec3(values[3], values[4], values[5]),
-                        cmd);
-                }
-                // attenuation const linear quadratic
-                else if (cmd == "attenuation" && ReadValues(s, 3, values))
-                {
-                    ATTEN = vec3(values[0], values[1], values[2]);
-                }
-                // ambient r g b
-                else if (cmd == "ambient" && ReadValues(s, 3, values))
-                {
-                    AMBIENT = vec3(values[0], values[1], values[2]);
                 }
                 else
                 {

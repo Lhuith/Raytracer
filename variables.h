@@ -62,12 +62,15 @@ public:
     }
     ray transform_ray(mat4 t)
     {
-        vec4 o_tran = vec4(o, 1) * t;
-        vec4 d_tran = vec4(d, 0) * t;
+        ray t_ray = ray(o, d);
 
-        return ray(
-            vec3(o_tran.x, o_tran.y, o_tran.z) / o_tran.w,
-            vec3(d_tran.x, d_tran.y, d_tran.z));
+        vec4 o_transform = (t * vec4(o.x, o.y, o.z, 1));
+        t_ray.o = vec3(o_transform.x, o_transform.y, o_transform.z);
+
+        vec4 d_transform = glm::normalize(t * vec4(d.x, d.y, d.z, 0));
+        t_ray.d = vec3(d_transform.x, d_transform.y, d_transform.z);
+
+        return t_ray;
     }
 };
 
@@ -220,11 +223,11 @@ public:
     string type() { return "tri"; }
     vec3 interpolateNormal(const vec3 &p)
     {
-        vec3 t_p = vec4(p, 1.0) * inv_tr;
+        vec3 t_p = inv_tr * vec4(p, 1.0);
         vec3 bary = barycentric(t_p);
 
         return vec3(
-            vec4((na * bary.x) + (nb * bary.y) + (nc * bary.z), 0.0f) * transpose(inv_tr));
+            transpose(inv_tr) * vec4((na * bary.x) + (nb * bary.y) + (nc * bary.z), 0.0f));
     }
     void print() {}
 };
@@ -257,7 +260,17 @@ public:
         float n_l = glm::max(dot(n, l), 0.0f);
         vec3 d = o.mat.diffuse * col * n_l;
 
-        return d;
+        vec3 halfv = normalize(l + normalize(-r.d));
+        float n_h = glm::max(dot(n, d), 0.0f);
+        vec3 s = o.mat.specular * col * pow(n_h, o.mat.shiny);
+
+        vec3 light_c = d + s;
+        if (type == "point")
+        {
+            float r = length(pos - hp);
+            light_c *= (1.0f / ATTEN.x * r * r + ATTEN.y * r + ATTEN.z);
+        }
+        return light_c;
     }
 };
 

@@ -30,6 +30,7 @@ void generate_image(BYTE *pixels)
         FreeImage_ConvertFromRawBits(
             pixels, WIDTH, HEIGHT, WIDTH * 3, 24, 0xFF0000, 0x00FF00, 0x0000FF, false),
         (IMAGE_LOCATION + FILENAME + ".png").c_str(), 0);
+    delete[] pixels;
 }
 // GL_BGR
 void SetPixel(BYTE *pixels, int i, int r, int g, int b)
@@ -62,6 +63,11 @@ void ReadOut()
          << "at <" << CAMLOOKAT.x << ", " << CAMLOOKAT.y << ", " << CAMLOOKAT.z << "> "
          << "up <" << CAMUP.x << ", " << CAMUP.y << ", " << CAMUP.z << "> "
          << "fovy " << FOVY << endl;
+}
+
+bool intersecting(ray r, obj &hit_obj, vec3)
+{
+    return false;
 }
 
 int trace(string scene)
@@ -114,10 +120,10 @@ int trace(string scene)
                         if (OBJS[i]->intersecting(t_ray, &obj_dist))
                         {
                             vec3 hit_trans = t_ray.o + t_ray.d * obj_dist;
-                            vec4 hit_extend = vec4(hit_trans, 1.0) * OBJS[i]->tr;
+                            vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0);
 
                             // dehomogeneous
-                            vec3 hit = vec3(hit_extend.x, hit_extend.y, hit_extend.z) / hit_extend.w;
+                            vec3 hit = hit_extend / hit_extend.w;
 
                             obj_dist = glm::length(hit - r.o);
                             if (obj_dist < nearest_dist)
@@ -136,7 +142,44 @@ int trace(string scene)
 
                 for (int i = 0; i < numLights; i++)
                 {
-                    if (LIGHTS[i]->type == "directional")
+                    if (LIGHTS[i]->type == "point")
+                    {
+                        ray l_ray = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
+
+                        obj *l_hit_obj = NULL;
+                        vec3 l_hit;
+                        float l_nearest_dist = INFINITY;
+                        for (int i = 0; i < numObjs; i++)
+                        {
+                            ray lt_ray = l_ray.transform_ray(OBJS[i]->inv_tr);
+                            float obj_dist;
+                            if (OBJS[i]->intersecting(lt_ray, &obj_dist))
+                            {
+                                vec3 hit_trans = lt_ray.o + lt_ray.d * obj_dist;
+                                vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0);
+
+                                // dehomogeneous
+                                vec3 hit = hit_extend / hit_extend.w;
+
+                                obj_dist = glm::length(hit - r.o);
+                                if (obj_dist < l_nearest_dist)
+                                {
+                                    l_hit = hit;
+                                    l_hit_obj = OBJS[i];
+                                    l_nearest_dist = obj_dist;
+                                }
+                            }
+                        }
+
+                        if (l_hit_obj != NULL)
+                        {
+                            if (glm::dot(l_hit - hit_point, l_hit - hit_point) < EPS)
+                            {
+                                c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+                            }
+                        }
+                    }
+                    else
                     {
                         c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
                     }
@@ -153,30 +196,30 @@ int trace(string scene)
     {
         cout << "error reading information" << endl;
     }
-    // delete[] pixels;
     return error;
 }
 
 string scenes[] =
     {
         "scene1-camera1",
-        "scene1-camera2",
-        "scene1-camera3",
-        "scene1-camera4",
-        //"scene2-camera1",
-        //"scene2-camera2",
-        //"scene2-camera3",
+        // "scene1-camera2",
+        // "scene1-camera3",
+        // "scene1-camera4",
+        // "scene2-camera1",
+        // "scene2-camera2",
+        // "scene2-camera3",
+        // "scene3",
 };
 
 int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-    // trace("scene1");
-    for (string s : scenes)
-    {
-        cout << s << endl;
-        trace(s);
-    }
+    trace("scene3");
+    // for (string s : scenes)
+    // {
+    //     cout << s << endl;
+    //     trace(s);
+    // }
     return 0;
 }
