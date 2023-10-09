@@ -65,8 +65,33 @@ void ReadOut()
          << "fovy " << FOVY << endl;
 }
 
-bool intersecting(ray r, obj &hit_obj, vec3)
+bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
 {
+    float nearest_dist = INFINITY;
+    if (numObjs != 0)
+    {
+        for (int i = 0; i < numObjs; i++)
+        {
+            ray t_ray = r.transform_ray(OBJS[i]->inv_tr);
+            float obj_dist;
+            if (OBJS[i]->intersecting(t_ray, &obj_dist))
+            {
+                vec3 hit_trans = t_ray.o + t_ray.d * obj_dist;
+                vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0);
+
+                //  dehomogeneous
+                vec3 hit = hit_extend / hit_extend.w;
+
+                obj_dist = glm::length(hit - r.o);
+                if (obj_dist < nearest_dist)
+                {
+                    *hit_point = hit;
+                    hit_obj = OBJS[i];
+                    nearest_dist = obj_dist;
+                }
+            }
+        }
+    }
     return false;
 }
 
@@ -105,36 +130,10 @@ int trace(string scene)
                 float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
 
                 ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
-
-                float nearest_dist = INFINITY;
                 obj *hit_obj = NULL;
                 vec3 hit_point;
 
-                // V :
-                if (numObjs != 0)
-                {
-                    for (int i = 0; i < numObjs; i++)
-                    {
-                        ray t_ray = r.transform_ray(OBJS[i]->inv_tr);
-                        float obj_dist;
-                        if (OBJS[i]->intersecting(t_ray, &obj_dist))
-                        {
-                            vec3 hit_trans = t_ray.o + t_ray.d * obj_dist;
-                            vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0);
-
-                            // dehomogeneous
-                            vec3 hit = hit_extend / hit_extend.w;
-
-                            obj_dist = glm::length(hit - r.o);
-                            if (obj_dist < nearest_dist)
-                            {
-                                hit_point = hit;
-                                hit_obj = OBJS[i];
-                                nearest_dist = obj_dist;
-                            }
-                        }
-                    }
-                }
+                intersecting(r, hit_obj, &hit_point);
                 if (hit_obj == NULL)
                     continue;
 
@@ -145,39 +144,6 @@ int trace(string scene)
                     if (LIGHTS[i]->type == "point")
                     {
                         ray l_ray = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
-
-                        obj *l_hit_obj = NULL;
-                        vec3 l_hit;
-                        float l_nearest_dist = INFINITY;
-                        for (int i = 0; i < numObjs; i++)
-                        {
-                            ray lt_ray = l_ray.transform_ray(OBJS[i]->inv_tr);
-                            float obj_dist;
-                            if (OBJS[i]->intersecting(lt_ray, &obj_dist))
-                            {
-                                vec3 hit_trans = lt_ray.o + lt_ray.d * obj_dist;
-                                vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0);
-
-                                // dehomogeneous
-                                vec3 hit = hit_extend / hit_extend.w;
-
-                                obj_dist = glm::length(hit - r.o);
-                                if (obj_dist < l_nearest_dist)
-                                {
-                                    l_hit = hit;
-                                    l_hit_obj = OBJS[i];
-                                    l_nearest_dist = obj_dist;
-                                }
-                            }
-                        }
-
-                        if (l_hit_obj != NULL)
-                        {
-                            if (glm::dot(l_hit - hit_point, l_hit - hit_point) < EPS)
-                            {
-                                c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
-                            }
-                        }
                     }
                     else
                     {
@@ -215,7 +181,7 @@ int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-    trace("scene3");
+    trace("scene1-camera1");
     // for (string s : scenes)
     // {
     //     cout << s << endl;
