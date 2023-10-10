@@ -143,7 +143,19 @@ int trace(string scene)
                 {
                     if (LIGHTS[i]->type == "point")
                     {
-                        ray l_ray = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
+                        ray light_r = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
+
+                        obj *tmp_obj = NULL;
+                        vec3 l_hit;
+
+                        bool ok = intersecting(light_r, tmp_obj, &l_hit);
+                        if (ok)
+                        {
+                            if (dot(l_hit - hit_point, l_hit - hit_point) < EPS)
+                            {
+                                c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+                            }
+                        }
                     }
                     else
                     {
