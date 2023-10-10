@@ -95,11 +95,49 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
     return hit_obj != NULL;
 }
 
-void start_trace(string scene)
+vec3 trace(vec3 &c, ray &r)
 {
+    obj *hit_obj = NULL;
+    vec3 hit_point;
+
+    intersecting(r, hit_obj, &hit_point);
+    if (hit_obj == NULL)
+    {
+        return vec3(0, 0, 0);
+    }
+
+    c = hit_obj->mat.ambient + hit_obj->mat.emission;
+    for (int i = 0; i < numLights; i++)
+    {
+        if (LIGHTS[i]->type == "point")
+        {
+            ray light_r = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
+
+            obj *tmp_obj = NULL;
+            vec3 l_hit;
+
+            if (intersecting(light_r, tmp_obj, &l_hit))
+            {
+                if (dot(l_hit - hit_point, l_hit - hit_point) < EPS)
+                {
+                    c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+                }
+            }
+        }
+        else
+        {
+            c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+        }
+    }
+
+    if ((length(hit_obj->mat.specular) != 0))
+    {
+        vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
+        ray r_r = r.reflect(hit_point, i_n);
+    }
 }
 
-int trace(string scene)
+int run_scene(string scene)
 {
     numObjs = 0;
     numLights = 0;
@@ -124,61 +162,23 @@ int trace(string scene)
             vec3 c = vec3(0, 0, 0);
             // for each pixel
             int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
-            // trace primary eye ray, find intersection
-            { // ray calculation
-                vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
-                vec3 u = glm::normalize(glm::cross(CAMUP, w));
-                vec3 v = glm::cross(w, u);
 
-                float fovy = FOVY * PI / 180.0;
+            vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
+            vec3 u = glm::normalize(glm::cross(CAMUP, w));
+            vec3 v = glm::cross(w, u);
 
-                float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
+            float fovy = FOVY * PI / 180.0;
 
-                float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
-                float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
+            float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
 
-                ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
-                obj *hit_obj = NULL;
-                vec3 hit_point;
+            float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
+            float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
 
-                intersecting(r, hit_obj, &hit_point);
-                if (hit_obj == NULL)
-                    continue;
+            ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
 
-                c = hit_obj->mat.ambient + hit_obj->mat.emission;
+            c += trace(c, r);
 
-                for (int i = 0; i < numLights; i++)
-                {
-                    if (LIGHTS[i]->type == "point")
-                    {
-                        ray light_r = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
-
-                        obj *tmp_obj = NULL;
-                        vec3 l_hit;
-
-                        bool ok = intersecting(light_r, tmp_obj, &l_hit);
-                        if (ok)
-                        {
-                            if (dot(l_hit - hit_point, l_hit - hit_point) < EPS)
-                            {
-                                c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
-                    }
-                }
-
-                if ((length(hit_obj->mat.specular) != 0))
-                {
-                    vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
-                    ray r_r = r.reflect(hit_point, i_n);
-                }
-
-                SetPixel(pixels, pixel, c);
-            }
+            SetPixel(pixels, pixel, c);
         }
     }
     cout << pix * 3 << endl;
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    start_trace("scene4-specular");
+    run_scene("scene1-camera1");
 
     // for (string s : scenes)
     // {
