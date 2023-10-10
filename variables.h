@@ -26,9 +26,9 @@ float FOVY;
 // MATERIAL
 vec3 EMISSION;
 vec3 DIFFUSE;
-vec3 SPECULAR;
+vec3 SPECULAR = vec3(0, 0, 0);
 vec3 AMBIENT = vec3(.2, .2, .2);
-float SHINY;
+float SHINY = 0;
 
 vec3 ATTEN = vec3(1, 0, 0);
 class material
@@ -73,9 +73,10 @@ public:
         return t_ray;
     }
 
-    ray reflect(vec3 h, vec3 n)
+    ray reflect(vec3 &h, vec3 &n)
     {
-        return ray(h, d - (n * (2 * dot(d, n))));
+        vec3 p = normalize(d - (n * (2 * dot(d, n))));
+        return ray(h, p);
     }
 };
 
@@ -268,7 +269,7 @@ public:
         vec3 d = o.mat.diffuse * col * n_l;
 
         vec3 halfv = normalize(l + normalize(-r.d));
-        float n_h = glm::max(dot(n, d), 0.0f);
+        float n_h = glm::max(dot(n, halfv), 0.0f);
         vec3 s = o.mat.specular * col * pow(n_h, o.mat.shiny);
 
         vec3 light_c = d + s;

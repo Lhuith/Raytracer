@@ -135,11 +135,10 @@ vec3 trace(ray &r, int depth)
         }
     }
 
-    if ((length(hit_obj->mat.specular) != 0))
-    {
-        vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
-        ray r_r = r.reflect(hit_point, i_n);
-    }
+    vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
+    ray r_r = r.reflect(hit_point, i_n);
+    vec3 r_col = trace(r_r, depth + 1);
+    c = c + hit_obj->mat.specular * r_col;
 
     return c;
 }
@@ -213,7 +212,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene4-diffuse");
+    run_scene("scene4-specular");
 
     // for (string s : scenes)
     // {
