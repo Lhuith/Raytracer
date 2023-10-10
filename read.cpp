@@ -217,28 +217,17 @@ int ReadCommands(const string filename)
                 }
                 else if (cmd == "translate" && ReadValues(s, 3, values))
                 {
-                    cout << "translate> ";
-                    cout << values[0] << ", " << values[1] << ", " << values[2] << " ";
-                    rightmult(
-                        transform::translate(values[0], values[1], values[2]), t_stack);
-                    cout << endl;
+
+                    rightmult(transform::translate(values[0], values[1], values[2]), t_stack);
                 }
                 else if (cmd == "scale" && ReadValues(s, 3, values))
                 {
-                    cout << "scale> ";
-                    cout << values[0] << ", " << values[1] << ", " << values[2] << " ";
                     rightmult(transform::scale(values[0], values[1], values[2]), t_stack);
-                    cout << endl;
                 }
                 else if (cmd == "rotate" && ReadValues(s, 4, values))
                 {
-                    cout << "rotate> ";
-                    cout << "axis: " << values[0] << ", " << values[1] << ", " << values[2] << " ";
-                    cout << "angle: " << values[3];
-                    // [c][r]
                     mat3 rot = transform::rotate(values[3], vec3(values[0], values[1], values[2]));
                     rightmult(mat4(rot), t_stack);
-                    cout << endl;
                 }
                 // pushTransform
                 else if (cmd == "pushTransform")

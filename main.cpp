@@ -72,7 +72,7 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
     {
         for (int i = 0; i < numObjs; i++)
         {
-            ray t_ray = r.transform_ray(OBJS[i]->inv_tr);
+            ray t_ray = r.transform(OBJS[i]->inv_tr);
             float obj_dist;
             if (OBJS[i]->intersecting(t_ray, &obj_dist))
             {
@@ -93,6 +93,10 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
         }
     }
     return hit_obj != NULL;
+}
+
+void start_trace(string scene)
+{
 }
 
 int trace(string scene)
@@ -167,6 +171,12 @@ int trace(string scene)
                     }
                 }
 
+                if ((length(hit_obj->mat.specular) != 0))
+                {
+                    vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
+                    ray r_r = r.reflect(hit_point, i_n);
+                }
+
                 SetPixel(pixels, pixel, c);
             }
         }
@@ -197,11 +207,14 @@ int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-    trace("scene4-diffuse");
+
+    start_trace("scene4-specular");
+
     // for (string s : scenes)
     // {
     //     cout << s << endl;
     //     trace(s);
     // }
+
     return 0;
 }

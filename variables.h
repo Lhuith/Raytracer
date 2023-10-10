@@ -60,7 +60,7 @@ public:
         o = _o;
         d = _d;
     }
-    ray transform_ray(mat4 t)
+    ray transform(mat4 t)
     {
         ray t_ray = ray(o, d);
 
@@ -71,6 +71,11 @@ public:
         t_ray.d = vec3(d_transform.x, d_transform.y, d_transform.z);
 
         return t_ray;
+    }
+
+    ray reflect(vec3 h, vec3 n)
+    {
+        return ray(h, d - (n * (2 * dot(d, n))));
     }
 };
 
