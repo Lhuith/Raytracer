@@ -91,7 +91,7 @@ public:
         cout << "default intersection" << endl;
         return false;
     }
-    virtual vec3 interpolateNormal(const vec3 &p) {}
+    virtual vec3 interpolateNormal(const vec3 &p) { return vec3(0, 1, 0); }
     virtual void print() {}
 };
 

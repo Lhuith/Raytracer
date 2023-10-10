@@ -95,18 +95,23 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
     return hit_obj != NULL;
 }
 
-vec3 trace(vec3 &c, ray &r)
+vec3 trace(ray &r, int depth)
 {
+    if (depth > DEPTH)
+    {
+        return vec3(0, 0, 0); // black pixel
+    }
+
     obj *hit_obj = NULL;
     vec3 hit_point;
 
     intersecting(r, hit_obj, &hit_point);
     if (hit_obj == NULL)
     {
-        return vec3(0, 0, 0);
+        return vec3(0, 0, 0); // black pixel
     }
 
-    c = hit_obj->mat.ambient + hit_obj->mat.emission;
+    vec3 c = hit_obj->mat.ambient + hit_obj->mat.emission;
     for (int i = 0; i < numLights; i++)
     {
         if (LIGHTS[i]->type == "point")
@@ -135,6 +140,8 @@ vec3 trace(vec3 &c, ray &r)
         vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
         ray r_r = r.reflect(hit_point, i_n);
     }
+
+    return c;
 }
 
 int run_scene(string scene)
@@ -176,9 +183,7 @@ int run_scene(string scene)
 
             ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
 
-            c += trace(c, r);
-
-            SetPixel(pixels, pixel, c);
+            SetPixel(pixels, pixel, trace(r, 0));
         }
     }
     cout << pix * 3 << endl;
@@ -208,7 +213,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene1-camera1");
+    run_scene("scene4-diffuse");
 
     // for (string s : scenes)
     // {
