@@ -197,11 +197,11 @@ int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-    // trace("scene5");
-    for (string s : scenes)
-    {
-        cout << s << endl;
-        trace(s);
-    }
+    trace("scene4-diffuse");
+    // for (string s : scenes)
+    // {
+    //     cout << s << endl;
+    //     trace(s);
+    // }
     return 0;
 }
