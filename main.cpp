@@ -92,7 +92,7 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
             }
         }
     }
-    return false;
+    return hit_obj != NULL;
 }
 
 int trace(string scene)
