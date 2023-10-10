@@ -13,7 +13,7 @@ using namespace glm;
 #ifndef VARIABLES_FILE_H
 #define VARIABLES_FILE_H
 #define PI 3.1415926535897931159979634685442
-#define EPS std::numeric_limits<double>::epsilon()
+#define EPS std::numeric_limits<float>::epsilon()
 
 // SCENE
 int WIDTH, HEIGHT, DEPTH;
@@ -145,8 +145,10 @@ public:
     }
     vec3 interpolateNormal(const vec3 &p)
     {
-        vec3 t_p = vec4(p, 1.0) * inv_tr;
-        return vec3(vec4(t_p - c, 1.0) * transpose(inv_tr));
+        vec4 t_p = inv_tr * vec4(p, 1.0f);
+        vec3 pt = vec3(t_p.x / t_p.w, t_p.y / t_p.w, t_p.z / t_p.w);
+
+        return vec3(transpose(inv_tr) * vec4(pt - c, 0.0));
     }
 };
 
@@ -268,7 +270,7 @@ public:
         if (type == "point")
         {
             float r = length(pos - hp);
-            light_c *= (1.0f / ATTEN.x * r * r + ATTEN.y * r + ATTEN.z);
+            light_c *= (1.0f / (ATTEN.z * r * r + ATTEN.y * r + ATTEN.x));
         }
         return light_c;
     }
