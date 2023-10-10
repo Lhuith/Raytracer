@@ -109,6 +109,10 @@ int trace(string scene)
 
     int pix = WIDTH * HEIGHT;
     BYTE *pixels = new BYTE[pix * 3];
+    for (int i = 0; i < pix * 3; i++)
+    {
+        pixels[i] = 0;
+    }
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
@@ -180,24 +184,24 @@ int trace(string scene)
 string scenes[] =
     {
         "scene1-camera1",
-        // "scene1-camera2",
-        // "scene1-camera3",
-        // "scene1-camera4",
-        // "scene2-camera1",
-        // "scene2-camera2",
-        // "scene2-camera3",
-        // "scene3",
+        "scene1-camera2",
+        "scene1-camera3",
+        "scene1-camera4",
+        "scene2-camera1",
+        "scene2-camera2",
+        "scene2-camera3",
+        "scene3",
 };
 
 int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-    trace("scene1-camera1");
-    // for (string s : scenes)
-    // {
-    //     cout << s << endl;
-    //     trace(s);
-    // }
+    // trace("scene5");
+    for (string s : scenes)
+    {
+        cout << s << endl;
+        trace(s);
+    }
     return 0;
 }

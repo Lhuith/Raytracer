@@ -90,7 +90,7 @@ public:
     virtual void print() {}
 };
 
-int MAX_OBJS = 100;
+int MAX_OBJS = 10000;
 int numObjs;
 obj **OBJS;
 
