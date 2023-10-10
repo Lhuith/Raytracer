@@ -50,7 +50,7 @@ void init()
 {
     WIDTH = 0;
     HEIGHT = 0;
-    DEPTH = 5;
+    DEPTH = 2;
 
     OBJS = new obj *[MAX_OBJS];
     LIGHTS = new light *[MAX_LIGHTS];
@@ -97,7 +97,7 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
 
 vec3 trace(ray &r, int depth)
 {
-    if (depth > DEPTH)
+    if (depth >= DEPTH)
     {
         return vec3(0, 0, 0); // black pixel
     }
@@ -135,10 +135,16 @@ vec3 trace(ray &r, int depth)
         }
     }
 
-    vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
+    // if (hit_obj->mat.specular.x != 0 &&
+    //     hit_obj->mat.specular.y != 0 &&
+    //     hit_obj->mat.specular.z != 0)
+    // {
+
+    vec3 i_n = glm::normalize(hit_obj->interpolateNormal(hit_point));
     ray r_r = r.reflect(hit_point, i_n);
     vec3 r_col = trace(r_r, depth + 1);
     c = c + hit_obj->mat.specular * r_col;
+    // }
 
     return c;
 }

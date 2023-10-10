@@ -12,7 +12,7 @@ using namespace glm;
 
 #ifndef VARIABLES_FILE_H
 #define VARIABLES_FILE_H
-#define PI 3.1415926535897931159979634685442
+#define PI 3.14159
 #define EPS std::numeric_limits<float>::epsilon()
 
 // SCENE
@@ -24,8 +24,8 @@ vec3 CAMLOOKFROM, CAMLOOKAT, CAMUP;
 float FOVY;
 
 // MATERIAL
-vec3 EMISSION;
-vec3 DIFFUSE;
+vec3 EMISSION = vec3(0, 0, 0);
+vec3 DIFFUSE = vec3(0, 0, 0);
 vec3 SPECULAR = vec3(0, 0, 0);
 vec3 AMBIENT = vec3(.2, .2, .2);
 float SHINY = 0;
@@ -75,8 +75,7 @@ public:
 
     ray reflect(vec3 &h, vec3 &n)
     {
-        vec3 p = normalize(d - (n * (2 * dot(d, n))));
-        return ray(h, p);
+        return ray(h + (n * EPS), d - 2 * glm::dot(n, d) * n);
     }
 };
 
