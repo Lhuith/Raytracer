@@ -50,7 +50,7 @@ void init()
 {
     WIDTH = 0;
     HEIGHT = 0;
-    DEPTH = 2;
+    DEPTH = 3;
 
     OBJS = new obj *[MAX_OBJS];
     LIGHTS = new light *[MAX_LIGHTS];

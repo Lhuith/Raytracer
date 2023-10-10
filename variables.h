@@ -75,7 +75,8 @@ public:
 
     ray reflect(vec3 &h, vec3 &n)
     {
-        return ray(h + (n * EPS), d - 2 * glm::dot(n, d) * n);
+        vec3 p = d - 2 * glm::dot(n, d) * n;
+        return ray(h + (p * 0.001f), p);
     }
 };
 
