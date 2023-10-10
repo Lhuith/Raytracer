@@ -211,7 +211,8 @@ string scenes[] =
         "scene2-camera2",
         "scene2-camera3",
         "scene3",
-};
+        "scene4-diffuse",
+        "scene4-specular"};
 
 int main(int argc, char *argv[])
 {
@@ -223,7 +224,7 @@ int main(int argc, char *argv[])
     // for (string s : scenes)
     // {
     //     cout << s << endl;
-    //     trace(s);
+    //     run_scene(s);
     // }
 
     return 0;
