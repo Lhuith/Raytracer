@@ -135,16 +135,16 @@ vec3 trace(ray &r, int depth)
         }
     }
 
-    // if (hit_obj->mat.specular.x != 0 &&
-    //     hit_obj->mat.specular.y != 0 &&
-    //     hit_obj->mat.specular.z != 0)
-    // {
+    if (hit_obj->mat.specular.x != 0 &&
+        hit_obj->mat.specular.y != 0 &&
+        hit_obj->mat.specular.z != 0)
+    {
 
-    vec3 i_n = glm::normalize(hit_obj->interpolateNormal(hit_point));
-    ray r_r = r.reflect(hit_point, i_n);
-    vec3 r_col = trace(r_r, depth + 1);
-    c = c + hit_obj->mat.specular * r_col;
-    // }
+        vec3 i_n = glm::normalize(hit_obj->interpolateNormal(hit_point));
+        ray r_r = r.reflect(hit_point, i_n);
+        vec3 r_col = trace(r_r, depth + 1);
+        c = c + hit_obj->mat.specular * r_col;
+    }
 
     return c;
 }
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene4-specular");
+    run_scene("scene6");
 
     // for (string s : scenes)
     // {

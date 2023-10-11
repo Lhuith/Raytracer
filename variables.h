@@ -24,9 +24,9 @@ vec3 CAMLOOKFROM, CAMLOOKAT, CAMUP;
 float FOVY;
 
 // MATERIAL
-vec3 EMISSION = vec3(0, 0, 0);
-vec3 DIFFUSE = vec3(0, 0, 0);
-vec3 SPECULAR = vec3(0, 0, 0);
+vec3 EMISSION;
+vec3 DIFFUSE;
+vec3 SPECULAR;
 vec3 AMBIENT = vec3(.2, .2, .2);
 float SHINY = 0;
 
