@@ -152,9 +152,9 @@ public:
     vec3 interpolateNormal(const vec3 &p)
     {
         vec4 t_p = inv_tr * vec4(p, 1.0f);
-        vec3 pt = vec3(t_p.x / t_p.w, t_p.y / t_p.w, t_p.z / t_p.w);
+        vec3 pt = vec3(t_p.x, t_p.y, t_p.z) / t_p.w;
 
-        return vec3(transpose(inv_tr) * vec4(pt - c, 0.0));
+        return vec3(vec4(pt - c, 0.0) * transpose(inv_tr));
     }
 };
 
