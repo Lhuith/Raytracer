@@ -59,6 +59,7 @@ int ReadCommands(const string filename)
                 // bool validinput; // Validity of input
 
                 // size width height
+                // cout << "reading: " << cmd << endl;
                 if (cmd == "size")
                 {
                     if (ReadValues(s, 2, values))
@@ -78,12 +79,12 @@ int ReadCommands(const string filename)
                 // output filename
                 else if (cmd == "output")
                 {
-                    string name = "";
-                    s >> name;
-                    if (!s.fail() && s.rdbuf()->in_avail() != 0)
-                    {
-                        readInFileName = name;
-                    }
+                    // string name = "";
+                    // s >> name;
+                    // if (!s.fail() && s.rdbuf()->in_avail() != 0)
+                    // {
+                    //     readInFileName = name;
+                    // }
                 }
                 // Lighting Commands
                 // directional 0 0 1 .5 .5 .5
