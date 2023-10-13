@@ -33,17 +33,15 @@ void generate_image(BYTE *pixels)
     delete[] pixels;
 }
 // GL_BGR
-void SetPixel(BYTE *pixels, int i, int r, int g, int b)
+void SetPixel(BYTE *pixels, int i, float r, float g, float b)
 {
-    pixels[i + 0] = b * 255;
-    pixels[i + 1] = g * 255;
-    pixels[i + 2] = r * 255;
+    pixels[i + 0] = glm::clamp(b, 0.0f, 1.0f) * 255;
+    pixels[i + 1] = glm::clamp(g, 0.0f, 1.0f) * 255;
+    pixels[i + 2] = glm::clamp(r, 0.0f, 1.0f) * 255;
 }
 void SetPixel(BYTE *pixels, int i, vec3 c)
 {
-    pixels[i + 0] = c.b * 255;
-    pixels[i + 1] = c.g * 255;
-    pixels[i + 2] = c.r * 255;
+    SetPixel(pixels, i, c.r, c.g, c.b);
 }
 
 void init()
