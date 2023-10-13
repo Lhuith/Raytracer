@@ -171,29 +171,36 @@ int run_scene(string scene)
         {
             pixels[i] = 0;
         }
-        for (int i = 0; i < HEIGHT; i++)
+
+        omp_set_num_threads(32);
+#pragma omp parallel for
         {
-            for (int j = 0; j < WIDTH; j++)
+            for (int i = 0; i < HEIGHT; i++)
             {
+                for (int j = 0; j < WIDTH; j++)
+                {
 
-                vec3 c = vec3(0, 0, 0);
-                // for each pixel
-                int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
+                    vec3 c = vec3(0, 0, 0);
+                    // for each pixel
+                    int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
 
-                vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
-                vec3 u = glm::normalize(glm::cross(CAMUP, w));
-                vec3 v = glm::cross(w, u);
+                    vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
+                    vec3 u = glm::normalize(glm::cross(CAMUP, w));
+                    vec3 v = glm::cross(w, u);
 
-                float fovy = FOVY * PI / 180.0;
+                    float fovy = FOVY * PI / 180.0;
 
-                float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
+                    float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
 
-                float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
-                float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
+                    float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
+                    float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
 
-                ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
-
-                SetPixel(pixels, pixel, trace(r, 0));
+                    ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
+#pragma omp parallel atomic
+                    {
+                        SetPixel(pixels, pixel, trace(r, 0));
+                    }
+                }
             }
         }
         cout << pix * 3 << endl;
@@ -223,11 +230,8 @@ int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-#pragma omp parallel
-    {
-        cout << "openMP sanity check" << endl;
-    }
-    run_scene("scene6");
+
+    run_scene("scene5");
 
     // for (string s : scenes)
     // {
