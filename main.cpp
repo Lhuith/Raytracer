@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene4-specular");
+    run_scene("_scene5");
 
     // for (string s : scenes)
     // {
