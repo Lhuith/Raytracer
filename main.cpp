@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene5");
+    run_scene("scene4-diffuse");
 
     // for (string s : scenes)
     // {
