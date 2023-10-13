@@ -121,7 +121,9 @@ vec3 trace(ray &r, int depth)
 
             if (intersecting(light_r, tmp_obj, &l_hit))
             {
-                if (dot(l_hit - hit_point, l_hit - hit_point) < EPS)
+                // note : point light shadow casting isn't is a little off
+                // have to lower EPS threshold to remove artifacts
+                if (dot(l_hit - hit_point, l_hit - hit_point) < 1e-3)
                 {
                     c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
                 }
@@ -142,7 +144,7 @@ vec3 trace(ray &r, int depth)
     ray r_r = r.reflect(hit_point, i_n);
     vec3 r_col = trace(r_r, depth + 1);
     c = c + hit_obj->mat.specular * r_col;
-    // }
+    //  }
 
     return c;
 }
@@ -217,7 +219,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("_scene5");
+    run_scene("scene5");
 
     // for (string s : scenes)
     // {
