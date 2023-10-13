@@ -124,7 +124,7 @@ vec3 trace(ray &r, int depth)
             {
                 // note : point light shadow casting isn't is a little off
                 // have to lower EPS threshold to remove artifacts
-                if (dot(l_hit - hit_point, l_hit - hit_point) < 1e-3)
+                if (dot(l_hit - hit_point, l_hit - hit_point) < 1e-6)
                 {
                     c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
                 }
@@ -172,15 +172,14 @@ int run_scene(string scene)
             pixels[i] = 0;
         }
 
-        omp_set_num_threads(32);
+        omp_set_num_threads(64);
+        double start = omp_get_wtime();
 #pragma omp parallel for
         {
             for (int i = 0; i < HEIGHT; i++)
             {
                 for (int j = 0; j < WIDTH; j++)
                 {
-
-                    vec3 c = vec3(0, 0, 0);
                     // for each pixel
                     int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
 
@@ -196,15 +195,16 @@ int run_scene(string scene)
                     float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
 
                     ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
+
+                    vec3 c = trace(r, 0);
 #pragma omp parallel atomic
-                    {
-                        SetPixel(pixels, pixel, trace(r, 0));
-                    }
+                    SetPixel(pixels, pixel, c);
                 }
             }
         }
         cout << pix * 3 << endl;
         generate_image(pixels);
+        printf("image generated in: %lf \n", ((omp_get_wtime() - start) / (double)60.0));
     }
     else
     {
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene5");
+    run_scene("scene4-specular");
 
     // for (string s : scenes)
     // {
