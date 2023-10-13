@@ -14,8 +14,8 @@
 #include <GL/glut.h>
 #endif
 
+#include <omp.h>
 #include <stdio.h>
-
 #include <ctype.h>
 
 using namespace std;
@@ -223,8 +223,11 @@ int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
-
-    run_scene("scene7");
+#pragma omp parallel
+    {
+        cout << "openMP sanity check" << endl;
+    }
+    run_scene("scene6");
 
     // for (string s : scenes)
     // {
