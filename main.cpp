@@ -15,6 +15,7 @@
 #endif
 
 #include <stdio.h>
+
 #include <ctype.h>
 
 using namespace std;
@@ -155,48 +156,52 @@ int run_scene(string scene)
     numLights = 0;
 
     int error = ReadCommands(scene);
-    cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
-    cout << "fileName: " << FILENAME << endl;
 
-    cout << "# of objects: " << numObjs << endl;
-    cout << "# of lights: " << numLights << endl;
+    if (error == 0)
+    {
+        cout << "height: " << HEIGHT << ", width: " << WIDTH << ", depth: " << DEPTH << endl;
+        cout << "fileName: " << FILENAME << endl;
 
-    int pix = WIDTH * HEIGHT;
-    BYTE *pixels = new BYTE[pix * 3];
-    for (int i = 0; i < pix * 3; i++)
-    {
-        pixels[i] = 0;
-    }
-    for (int i = 0; i < HEIGHT; i++)
-    {
-        for (int j = 0; j < WIDTH; j++)
+        cout << "# of objects: " << numObjs << endl;
+        cout << "# of lights: " << numLights << endl;
+
+        int pix = WIDTH * HEIGHT;
+        BYTE *pixels = new BYTE[pix * 3];
+        for (int i = 0; i < pix * 3; i++)
         {
-            vec3 c = vec3(0, 0, 0);
-            // for each pixel
-            int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
-
-            vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
-            vec3 u = glm::normalize(glm::cross(CAMUP, w));
-            vec3 v = glm::cross(w, u);
-
-            float fovy = FOVY * PI / 180.0;
-
-            float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
-
-            float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
-            float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
-
-            ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
-
-            SetPixel(pixels, pixel, trace(r, 0));
+            pixels[i] = 0;
         }
-    }
-    cout << pix * 3 << endl;
-    generate_image(pixels);
+        for (int i = 0; i < HEIGHT; i++)
+        {
+            for (int j = 0; j < WIDTH; j++)
+            {
 
-    if (error == 2)
+                vec3 c = vec3(0, 0, 0);
+                // for each pixel
+                int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
+
+                vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
+                vec3 u = glm::normalize(glm::cross(CAMUP, w));
+                vec3 v = glm::cross(w, u);
+
+                float fovy = FOVY * PI / 180.0;
+
+                float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
+
+                float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
+                float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
+
+                ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
+
+                SetPixel(pixels, pixel, trace(r, 0));
+            }
+        }
+        cout << pix * 3 << endl;
+        generate_image(pixels);
+    }
+    else
     {
-        cout << "error reading information" << endl;
+        cout << "error reading information: " << error << endl;
     }
     return error;
 }
@@ -219,7 +224,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene1-camera1");
+    run_scene("scene7");
 
     // for (string s : scenes)
     // {

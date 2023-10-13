@@ -248,7 +248,8 @@ int ReadCommands(const string filename)
                 }
                 else
                 {
-                    cerr << "Unknown Command: " << cmd << " Skipping \n";
+                    cerr << "Unknown Command: " << cmd << endl;
+                    return 3;
                 }
             }
             getline(in, str);
