@@ -20,7 +20,7 @@
 
 using namespace std;
 
-#define IMAGE_LOCATION "images/"
+#define IMAGE_LOCATION "hw3/"
 
 void generate_image(BYTE *pixels)
 {
@@ -172,7 +172,7 @@ int run_scene(string scene)
             pixels[i] = 0;
         }
 
-        omp_set_num_threads(64);
+        omp_set_num_threads(128);
         double start = omp_get_wtime();
 #pragma omp parallel for
         {
@@ -215,29 +215,33 @@ int run_scene(string scene)
 
 string scenes[] =
     {
-        "scene1-camera1",
-        "scene1-camera2",
-        "scene1-camera3",
-        "scene1-camera4",
-        "scene2-camera1",
-        "scene2-camera2",
-        "scene2-camera3",
-        "scene3",
+        // "scene1-camera1",
+        // "scene1-camera2",
+        // "scene1-camera3",
+        // "scene1-camera4",
+        // "scene2-camera1",
+        // "scene2-camera2",
+        // "scene2-camera3",
+        // "scene3",
         "scene4-diffuse",
-        "scene4-specular"};
+        "scene4-specular",
+        "scene4-ambient",
+        "scene4-emission",
+        "scene5",
+        "scene6"};
 
 int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene4-specular");
+    // run_scene("scene7");
 
-    // for (string s : scenes)
-    // {
-    //     cout << s << endl;
-    //     run_scene(s);
-    // }
+    for (string s : scenes)
+    {
+        cout << s << endl;
+        run_scene(s);
+    }
 
     return 0;
 }
