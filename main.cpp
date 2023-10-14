@@ -34,15 +34,15 @@ void generate_image(BYTE *pixels)
     delete[] pixels;
 }
 // GL_BGR
-void SetPixel(BYTE *pixels, int i, float r, float g, float b)
+void SetPixel(BYTE *pixels, int i, float r, float g, float b, bool clamp)
 {
-    pixels[i + 0] = glm::clamp(b, 0.0f, 1.0f) * 255;
-    pixels[i + 1] = glm::clamp(g, 0.0f, 1.0f) * 255;
-    pixels[i + 2] = glm::clamp(r, 0.0f, 1.0f) * 255;
+    pixels[i + 0] = (clamp) ? glm::clamp(b, 0.0f, 1.0f) : b * 255;
+    pixels[i + 1] = (clamp) ? glm::clamp(g, 0.0f, 1.0f) : g * 255;
+    pixels[i + 2] = (clamp) ? glm::clamp(r, 0.0f, 1.0f) : r * 255;
 }
-void SetPixel(BYTE *pixels, int i, vec3 c)
+void SetPixel(BYTE *pixels, int i, vec3 c, bool clamp)
 {
-    SetPixel(pixels, i, c.r, c.g, c.b);
+    SetPixel(pixels, i, c.r, c.g, c.b, clamp);
 }
 
 void init()
@@ -116,7 +116,6 @@ vec3 trace(ray &r, int depth)
         if (LIGHTS[i]->type == "point")
         {
             ray light_r = ray(LIGHTS[i]->pos, hit_point - LIGHTS[i]->pos);
-
             obj *tmp_obj = NULL;
             vec3 l_hit;
 
@@ -124,7 +123,7 @@ vec3 trace(ray &r, int depth)
             {
                 // note : point light shadow casting isn't is a little off
                 // have to lower EPS threshold to remove artifacts
-                if (dot(l_hit - hit_point, l_hit - hit_point) < 1e-6)
+                if (dot(l_hit - hit_point, l_hit - hit_point) < 1e-5)
                 {
                     c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
                 }
@@ -136,16 +135,15 @@ vec3 trace(ray &r, int depth)
         }
     }
 
-    // if (hit_obj->mat.specular.x != 0 &&
-    //     hit_obj->mat.specular.y != 0 &&
-    //     hit_obj->mat.specular.z != 0)
-    // {
-
-    vec3 i_n = glm::normalize(hit_obj->interpolateNormal(hit_point));
-    ray r_r = r.reflect(hit_point, i_n);
-    vec3 r_col = trace(r_r, depth + 1);
-    c = c + hit_obj->mat.specular * r_col;
-    //  }
+    if (hit_obj->mat.specular.x != 0 &&
+        hit_obj->mat.specular.y != 0 &&
+        hit_obj->mat.specular.z != 0)
+    {
+        vec3 i_n = normalize(hit_obj->interpolateNormal(hit_point));
+        ray r_r = r.reflect(hit_point, i_n);
+        vec3 r_col = trace(r_r, depth + 1);
+        c = c + hit_obj->mat.specular * r_col;
+    }
 
     return c;
 }
@@ -181,7 +179,7 @@ int run_scene(string scene)
                 for (int j = 0; j < WIDTH; j++)
                 {
                     // for each pixel
-                    int pixel = 3 * ((HEIGHT - i - 1) * WIDTH + j);
+                    int pixel = 3 * ((HEIGHT - i) * WIDTH + j);
 
                     vec3 w = glm::normalize(CAMLOOKFROM - CAMLOOKAT);
                     vec3 u = glm::normalize(glm::cross(CAMUP, w));
@@ -191,14 +189,14 @@ int run_scene(string scene)
 
                     float tan_fovx = tan(fovy / 2.0) * WIDTH / HEIGHT;
 
-                    float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
-                    float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
+                    float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i + 0.5) / (HEIGHT / 2.0);
+                    float a = tan_fovx * (j + 0.5 - WIDTH / 2.0) / (WIDTH / 2.0);
 
                     ray r = ray(CAMLOOKFROM, -w + u * a + v * b);
 
                     vec3 c = trace(r, 0);
 #pragma omp parallel atomic
-                    SetPixel(pixels, pixel, c);
+                    SetPixel(pixels, pixel, c, false);
                 }
             }
         }
@@ -227,22 +225,21 @@ string scenes[] =
         "scene4-specular",
         "scene4-ambient",
         "scene4-emission",
-        // "scene5",
-        // "scene6"
-};
+        "scene5",
+        "scene6"};
 
 int main(int argc, char *argv[])
 {
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    // run_scene("scene7");
+    run_scene("scene6");
 
-    for (string s : scenes)
-    {
-        cout << s << endl;
-        run_scene(s);
-    }
+    // for (string s : scenes)
+    // {
+    //     cout << s << endl;
+    //     run_scene(s);
+    // }
 
     return 0;
 }
