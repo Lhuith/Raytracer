@@ -34,12 +34,20 @@ void generate_image(BYTE *pixels)
     delete[] pixels;
 }
 // GL_BGR
+void SetPixelClamped(BYTE *pixels, int i, float r, float g, float b, bool clamp)
+{
+    pixels[i + 0] = glm::clamp(b, 0.0f, 1.0f) * 255;
+    pixels[i + 1] = glm::clamp(g, 0.0f, 1.0f) * 255;
+    pixels[i + 2] = glm::clamp(r, 0.0f, 1.0f) * 255;
+}
+
 void SetPixel(BYTE *pixels, int i, float r, float g, float b, bool clamp)
 {
-    pixels[i + 0] = (clamp) ? glm::clamp(b, 0.0f, 1.0f) : b * 255;
-    pixels[i + 1] = (clamp) ? glm::clamp(g, 0.0f, 1.0f) : g * 255;
-    pixels[i + 2] = (clamp) ? glm::clamp(r, 0.0f, 1.0f) : r * 255;
+    pixels[i + 0] = b * 255;
+    pixels[i + 1] = g * 255;
+    pixels[i + 2] = r * 255;
 }
+
 void SetPixel(BYTE *pixels, int i, vec3 c, bool clamp)
 {
     SetPixel(pixels, i, c.r, c.g, c.b, clamp);
@@ -76,7 +84,7 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
             if (OBJS[i]->intersecting(t_ray, &obj_dist))
             {
                 vec3 hit_trans = t_ray.o + t_ray.d * obj_dist;
-                vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0);
+                vec4 hit_extend = OBJS[i]->tr * vec4(hit_trans, 1.0f);
 
                 //  dehomogeneous
                 vec3 hit = hit_extend / hit_extend.w;
@@ -131,7 +139,7 @@ vec3 trace(ray &r, int depth)
         }
         else
         {
-            c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
+            // c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
         }
     }
 
@@ -196,7 +204,7 @@ int run_scene(string scene)
 
                     vec3 c = trace(r, 0);
 #pragma omp parallel atomic
-                    SetPixel(pixels, pixel, c, false);
+                    SetPixel(pixels, pixel, c, true);
                 }
             }
         }

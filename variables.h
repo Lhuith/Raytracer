@@ -234,8 +234,8 @@ public:
         vec3 t_p = inv_tr * vec4(p, 1.0);
         vec3 bary = barycentric(t_p);
 
-        return vec3(
-            transpose(inv_tr) * vec4((na * bary.x) + (nb * bary.y) + (nc * bary.z), 0.0f));
+        vec3 triNormal = normalize((na * bary.x) + (nb * bary.y) + (nc * bary.z));
+        return vec3(transpose(inv_tr) * vec4(triNormal.x, triNormal.y, triNormal.z, 0.5f));
     }
     void print() {}
 };
@@ -254,21 +254,16 @@ public:
     }
     vec3 calculate_light(obj &o, ray &r, vec3 &hp)
     {
-        vec3 l;
-        if (type == "directional")
-        {
-            l = normalize(pos);
-        }
-        else if (type == "point")
+        vec3 l = normalize(pos);
+        if (type == "point")
         {
             l = normalize(pos - hp);
         }
 
         vec3 n = normalize(o.interpolateNormal(hp));
-        float n_l = glm::max(dot(n, l), 0.0f);
-        vec3 d = o.mat.diffuse * col * n_l;
+        vec3 d = o.mat.diffuse * col * glm::max(dot(n, l), 0.0f);
 
-        vec3 halfv = normalize(l + normalize(-r.d));
+        vec3 halfv = normalize(l - normalize(r.d));
         float n_h = glm::max(dot(n, halfv), 0.0f);
         vec3 s = o.mat.specular * col * pow(n_h, o.mat.shiny);
 
@@ -276,7 +271,7 @@ public:
         if (type == "point")
         {
             float r = length(pos - hp);
-            light_c *= (1.0f / (ATTEN.z * r * r + ATTEN.y * r + ATTEN.x));
+            light_c *= 1.0 / (ATTEN.z * (r * r) + ATTEN.y * r + ATTEN.x);
         }
         return light_c;
     }
