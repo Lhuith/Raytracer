@@ -126,13 +126,13 @@ vec3 trace(ray &r, int depth)
                 // have to lower EPS threshold to remove artifacts
                 if (dot(l_hit - hit_point, l_hit - hit_point) < 1e-6)
                 {
-                    c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+                    c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
                 }
             }
         }
         else
         {
-            c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point, ATTEN);
+            c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
         }
     }
 
@@ -194,7 +194,7 @@ int run_scene(string scene)
                     float b = tan(fovy / 2.0) * (HEIGHT / 2.0 - i) / (HEIGHT / 2.0);
                     float a = tan_fovx * (j - WIDTH / 2.0) / (WIDTH / 2.0);
 
-                    ray r = ray(CAMLOOKFROM, (a * u + b * v - w));
+                    ray r = ray(CAMLOOKFROM, -w + u * a + v * b);
 
                     vec3 c = trace(r, 0);
 #pragma omp parallel atomic
@@ -227,8 +227,9 @@ string scenes[] =
         "scene4-specular",
         "scene4-ambient",
         "scene4-emission",
-        "scene5",
-        "scene6"};
+        // "scene5",
+        // "scene6"
+};
 
 int main(int argc, char *argv[])
 {

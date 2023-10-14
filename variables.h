@@ -252,7 +252,7 @@ public:
         col = c;
         type = t;
     }
-    vec3 calculate_light(obj &o, ray &r, vec3 &hp, const vec3 &atten)
+    vec3 calculate_light(obj &o, ray &r, vec3 &hp)
     {
         vec3 l;
         if (type == "directional")
