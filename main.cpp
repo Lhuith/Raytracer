@@ -104,7 +104,7 @@ bool intersecting(ray &r, obj *&hit_obj, vec3 *hit_point)
 
 vec3 trace(ray &r, int depth)
 {
-    if (depth >= DEPTH)
+    if (depth > DEPTH)
     {
         return vec3(0, 0, 0); // black pixel
     }
@@ -139,7 +139,7 @@ vec3 trace(ray &r, int depth)
         }
         else
         {
-            // c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
+            c += LIGHTS[i]->calculate_light(*hit_obj, r, hit_point);
         }
     }
 
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
     init();
     cout << "Eugene Martens RayTracer" << endl;
 
-    run_scene("scene6");
+    run_scene("scene7");
 
     // for (string s : scenes)
     // {
